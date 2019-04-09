@@ -75,46 +75,47 @@ truncar :: AB a -> Integer -> AB a
 truncar = undefined
 
 --Ejecución de los tests
-main :: IO Counts
-main = do runTestTT allTests
-
-allTests = test [
-  "ejercicio1" ~: testsEj1,
-  "ejercicio2" ~: testsEj2,
-  "ejercicio3" ~: testsEj3,
-  "ejercicio4" ~: testsEj4,
-  "ejercicio5" ~: testsEj5,
-  "ejercicio6" ~: testsEj6,
-  "ejercicio7" ~: testsEj7
-  ]
-
-testsEj1 = test [
-  [1,2,4,5,7] ~=? inorder ab7,
-  [1,2,3,4,5,6,7] ~=? inorder ab5
-  ]
-  
-testsEj2 = test [
-  [5,3,6,1,7] ~=? inorder (mapAB (+1) ab6)
-  ]
-
-testsEj3 = test [
-  0 ~=? 0 --Cambiar esto por tests verdaderos.
-  ]
-
-testsEj4 = test [
-  0 ~=? 0 --Cambiar esto por tests verdaderos.
-  ]
-
-testsEj5 = test [
-  0 ~=? 0 --Cambiar esto por tests verdaderos.
-  ]
-
-testsEj6 = test [
-  True ~=? esHeap (<) (insertarHeap (<) (insertarHeap (<) ab6 3) 1),
-  True ~=? esABB (insertarABB (insertarABB ab7 6) 9)
-  ]
-
-testsEj7 = test [
-  [8,4,12,2,10,6,14,1,9,5,13,3,11,7,15] ~=? inorder (truncar ab8 4),
-  True ~=? esHeap (<) (truncar ab8 5)
-  ]
+--main :: IO Counts
+--main = do runTestTT allTests
+--
+--allTests = test [
+--  "ejercicio1" ~: testsEj1,
+--  "ejercicio2" ~: testsEj2,
+--  "ejercicio3" ~: testsEj3,
+--  "ejercicio4" ~: testsEj4,
+--  "ejercicio5" ~: testsEj5,
+--  "ejercicio6" ~: testsEj6,
+--  "ejercicio7" ~: testsEj7
+--  ]
+--
+--testsEj1 = test [
+--  [1,2,4,5,7] ~=? inorder ab7,
+--  [1,2,3,4,5,6,7] ~=? inorder ab5
+--  ]
+--  
+--testsEj2 = test [
+--  [5,3,6,1,7] ~=? inorder (mapAB (+1) ab6)
+--  ]
+--
+--testsEj3 = test [
+--  0 ~=? 0 --Cambiar esto por tests verdaderos.
+--  ]
+--
+--testsEj4 = test [
+--  0 ~=? 0 --Cambiar esto por tests verdaderos.
+--  ]
+--
+--testsEj5 = test [
+--  0 ~=? 0 --Cambiar esto por tests verdaderos.
+--  ]
+--
+--testsEj6 = test [
+--  True ~=? esHeap (<) (insertarHeap (<) (insertarHeap (<) ab6 3) 1),
+--  True ~=? esABB (insertarABB (insertarABB ab7 6) 9)
+--  ]
+--
+--testsEj7 = test [
+--  [8,4,12,2,10,6,14,1,9,5,13,3,11,7,15] ~=? inorder (truncar ab8 4),
+--  True ~=? esHeap (<) (truncar ab8 5)
+--  ]
+--
