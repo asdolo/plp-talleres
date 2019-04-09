@@ -42,6 +42,10 @@ ab6 = Bin ab1 0 (abHoja 6)
 ab7 = Bin (Bin (abHoja 1) 2 (abHoja 4)) 5 (abHoja 7)
 -- Heap (<) infinito, probar truncando
 ab8 = Bin (mapAB (*2) ab8) 1 (mapAB ((+1) . (*2)) ab8)
+-- Caso borde de ABB 1
+ab9 = Bin (Bin (abHoja 1) 2 (abHoja 4)) 3 (abHoja 5)
+-- Caso borde de ABB 2
+ab10 = Bin (abHoja 2) 3 (Bin (abHoja 1) 5 (abHoja 10))
 
 -- Ejercicios
 
@@ -62,15 +66,21 @@ nilOCumple :: (a -> a -> Bool) -> a -> AB a -> Bool
 nilOCumple c x ab = foldAB True (\_ n _ -> x `c` n) ab
 
 esABB :: Ord a => AB a -> Bool
-esABB = recAB True f
-  where f = \izq n der rIzq rDer -> (g izq n der) && rIzq && rDer
-        g = \izq n der -> (nilOCumple (>) n izq) && (nilOCumple (<) n der)
+esABB = recAB True fRec
+  where fRec            = \izq n der rIzq rDer -> (g izq n der) && rIzq && rDer
+        g               = \izq n der -> (esMayorQueTodos n izq) && (esMenorQueTodos n der)
+        esMayorQueTodos = \x ab -> x >= (foldAB x (\rI n rD -> maximum [rI,n,rD]) ab)
+        esMenorQueTodos = \x ab -> x <= (foldAB x (\rI n rD -> minimum [rI,n,rD]) ab)
 
 esHeap :: (a -> a -> Bool)  -> AB a -> Bool
-esHeap = undefined
+esHeap c = recAB True f
+  where f = \izq n der rIzq rDer -> (g izq n der) && rIzq && rDer
+        g = \izq n der -> (nilOCumple c n izq) && (nilOCumple c n der)
 
 completo :: AB a -> Bool
-completo = undefined
+completo ab = (2^(altura ab) - 1) == (cantNodos ab)
+  where altura = foldAB 0 (\rIzq n rDer -> 1 + (max rIzq rDer))
+        cantNodos = foldAB 0 (\rIzq n rDer -> 1 + rIzq + rDer)
 
 insertarABB :: Ord a => AB a -> a -> AB a
 insertarABB = undefined
