@@ -1,10 +1,10 @@
-import Test.HUnit
+--import Test.HUnit
 
 -- Definiciones de tipos
 
-data AB a = Nil | Bin (AB a) a (AB a) deriving Eq
+data AB a = Nil | Bin (AB a) a (AB a) deriving (Eq, Show)
 
-instance Show a => Show (AB a) where
+{-instance Show a => Show (AB a) where
   show t = padAB t 0 0
 
 -- Funciones auxiliares
@@ -14,6 +14,7 @@ pad i = replicate i ' '
 
 padAB :: Show a => AB a -> Int -> Int -> String
 padAB = foldAB (const $ const "") (\ri x rd n base ->let l = length $ show x in pad n ++ show x ++ ri 4 (base+l) ++ "\n" ++ rd (n+4+base+l) base)
+-}
 
 -- Crea una hoja de un árbol binario AB
 abHoja :: a -> AB a
@@ -44,11 +45,15 @@ ab8 = Bin (mapAB (*2) ab8) 1 (mapAB ((+1) . (*2)) ab8)
 
 -- Ejercicios
 
---recAB :: 
-recAB = undefined
+recAB :: b -> (AB a -> a -> AB a -> b -> b -> b) -> AB a -> b
+recAB z _ Nil = z
+recAB z f (Bin izq x der) = f izq x der recizq recder
+  where recizq = recAB z f izq
+        recder = recAB z f der
 
---foldAB 
-foldAB = undefined
+foldAB :: b -> (b -> a -> b -> b) -> AB a -> b
+foldAB z f = recAB z fRec
+  where fRec = \_ n _ rIzq rDer -> f rIzq n rDer
 
 mapAB :: (a -> b) -> AB a -> AB b
 mapAB = undefined
@@ -69,7 +74,7 @@ insertarABB :: Ord a => AB a -> a -> AB a
 insertarABB = undefined
 
 insertarHeap :: (a -> a -> Bool) -> AB a -> a -> AB a
-insertarHeap undefined 
+insertarHeap = undefined 
 
 truncar :: AB a -> Integer -> AB a
 truncar = undefined
@@ -92,6 +97,7 @@ truncar = undefined
 --  [1,2,4,5,7] ~=? inorder ab7,
 --  [1,2,3,4,5,6,7] ~=? inorder ab5
 --  ]
+
 --  
 --testsEj2 = test [
 --  [5,3,6,1,7] ~=? inorder (mapAB (+1) ab6)
