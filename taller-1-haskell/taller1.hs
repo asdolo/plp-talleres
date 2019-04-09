@@ -59,10 +59,12 @@ mapAB :: (a -> b) -> AB a -> AB b
 mapAB = undefined
 
 nilOCumple :: (a -> a -> Bool) -> a -> AB a -> Bool
-nilOCumple = undefined
+nilOCumple c x ab = foldAB True (\_ n _ -> x `c` n) ab
 
 esABB :: Ord a => AB a -> Bool
-esABB = undefined
+esABB = recAB True f
+  where f = \izq n der rIzq rDer -> (g izq n der) && rIzq && rDer
+        g = \izq n der -> (nilOCumple (>) n izq) && (nilOCumple (<) n der)
 
 esHeap :: (a -> a -> Bool)  -> AB a -> Bool
 esHeap = undefined
