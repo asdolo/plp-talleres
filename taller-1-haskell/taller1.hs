@@ -2,9 +2,9 @@
 
 -- Definiciones de tipos
 
-data AB a = Nil | Bin (AB a) a (AB a) deriving (Eq, Show)
+data AB a = Nil | Bin (AB a) a (AB a) deriving Eq
 
-{-instance Show a => Show (AB a) where
+instance Show a => Show (AB a) where
   show t = padAB t 0 0
 
 -- Funciones auxiliares
@@ -14,7 +14,7 @@ pad i = replicate i ' '
 
 padAB :: Show a => AB a -> Int -> Int -> String
 padAB = foldAB (const $ const "") (\ri x rd n base ->let l = length $ show x in pad n ++ show x ++ ri 4 (base+l) ++ "\n" ++ rd (n+4+base+l) base)
--}
+
 
 -- Crea una hoja de un árbol binario AB
 abHoja :: a -> AB a
@@ -46,6 +46,7 @@ ab8 = Bin (mapAB (*2) ab8) 1 (mapAB ((+1) . (*2)) ab8)
 ab9 = Bin (Bin (abHoja 1) 2 (abHoja 4)) 3 (abHoja 5)
 -- Caso borde de ABB 2
 ab10 = Bin (abHoja 2) 3 (Bin (abHoja 1) 5 (abHoja 10))
+
 
 -- Ejercicios
 
@@ -83,10 +84,24 @@ completo ab = (2^(altura ab) - 1) == (cantNodos ab)
         cantNodos = foldAB 0 (\rIzq n rDer -> 1 + rIzq + rDer)
 
 insertarABB :: Ord a => AB a -> a -> AB a
-insertarABB = undefined
+insertarABB ab x = recAB (abHoja x) (\izq n der rIzq rDer -> if x > n 
+                                                             then (Bin izq n rDer)
+                                                             else (Bin rIzq n der)) ab
+
+swapHeap :: (a -> a -> Bool) -> AB a -> a -> (a, AB a)
+swapHeap c (Bin i e d) x = if e `c` x then (e, Bin i x d) else (x, Bin i e d)
+
+swapDer = (\i e d c -> Bin i (fst (swapHeap c d e)) (snd (swapHeap c d e)))
+
+swapIzq = (\i e d c -> Bin (snd (swapHeap c i e)) (fst (swapHeap c i e)) d)
+
 
 insertarHeap :: (a -> a -> Bool) -> AB a -> a -> AB a
-insertarHeap = undefined 
+insertarHeap c ab x = recAB (abHoja x) (\izq n der rIzq rDer -> if ((completo izq) && (cantNodos izq) > (cantNodos der)) 
+                                                                then (swapDer izq n rDer c) else (swapIzq rIzq n der c)) ab
+  where cantNodos = foldAB 0 (\rIzq n rDer -> 1 + rIzq + rDer)
+
+
 
 truncar :: AB a -> Integer -> AB a
 truncar = undefined
