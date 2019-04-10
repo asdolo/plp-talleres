@@ -21,7 +21,7 @@ abHoja :: a -> AB a
 abHoja x = Bin Nil x Nil
 
 -- Devuelve una lista con los elementos de los nodos de un árbol binario AB recorridos en profundidad de izquierda a derecha
-inorder :: AB a -> [a]    
+inorder :: AB a -> [a]
 inorder = foldAB [] (\i r d -> i ++ (r:d))
 
 -- Estructuras para tests
@@ -81,30 +81,36 @@ esHeap c = recAB True f
 completo :: AB a -> Bool
 completo ab = (2^(altura ab) - 1) == (cantNodos ab)
   where altura = foldAB 0 (\rIzq n rDer -> 1 + (max rIzq rDer))
-        cantNodos = foldAB 0 (\rIzq n rDer -> 1 + rIzq + rDer)
 
 insertarABB :: Ord a => AB a -> a -> AB a
-insertarABB ab x = recAB (abHoja x) (\izq n der rIzq rDer -> if x > n 
+insertarABB ab x = recAB (abHoja x) (\izq n der rIzq rDer -> if x > n
                                                              then (Bin izq n rDer)
                                                              else (Bin rIzq n der)) ab
 
 swapHeap :: (a -> a -> Bool) -> AB a -> a -> (a, AB a)
 swapHeap c (Bin i e d) x = if e `c` x then (e, Bin i x d) else (x, Bin i e d)
 
-swapDer = (\i e d c -> Bin i (fst (swapHeap c d e)) (snd (swapHeap c d e)))
+swapDer = (\i e d c ->
+    let (x, der) = swapHeap c d e
+    in Bin i x der)
 
-swapIzq = (\i e d c -> Bin (snd (swapHeap c i e)) (fst (swapHeap c i e)) d)
-
+swapIzq = (\i e d c ->
+    let (x, izq) = swapHeap c i e
+    in Bin izq x d)
 
 insertarHeap :: (a -> a -> Bool) -> AB a -> a -> AB a
-insertarHeap c ab x = recAB (abHoja x) (\izq n der rIzq rDer -> if ((completo izq) && (cantNodos izq) > (cantNodos der)) 
-                                                                then (swapDer izq n rDer c) else (swapIzq rIzq n der c)) ab
-  where cantNodos = foldAB 0 (\rIzq n rDer -> 1 + rIzq + rDer)
-
-
+insertarHeap c ab x = recAB (abHoja x)
+                            (\izq n der rIzq rDer -> if ((completo izq) &&
+                                                        (cantNodos izq) > (cantNodos der))
+                                                     then (swapDer izq n rDer c)
+                                                     else (swapIzq rIzq n der c)) ab
 
 truncar :: AB a -> Integer -> AB a
 truncar = undefined
+
+-- Funciones auxiliares
+cantNodos :: AB a -> Integer
+cantNodos = foldAB 0 (\rIzq n rDer -> 1 + rIzq + rDer)
 
 --Ejecución de los tests
 --main :: IO Counts
@@ -124,8 +130,8 @@ truncar = undefined
 --  [1,2,4,5,7] ~=? inorder ab7,
 --  [1,2,3,4,5,6,7] ~=? inorder ab5
 --  ]
-
---  
+--
+--
 --testsEj2 = test [
 --  [5,3,6,1,7] ~=? inorder (mapAB (+1) ab6)
 --  ]
@@ -151,4 +157,4 @@ truncar = undefined
 --  [8,4,12,2,10,6,14,1,9,5,13,3,11,7,15] ~=? inorder (truncar ab8 4),
 --  True ~=? esHeap (<) (truncar ab8 5)
 --  ]
---
+
