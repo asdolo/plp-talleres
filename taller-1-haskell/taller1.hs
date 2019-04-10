@@ -1,4 +1,4 @@
---import Test.HUnit
+import Test.HUnit
 
 -- Definiciones de tipos
 
@@ -57,8 +57,7 @@ recAB z f (Bin izq x der) = f izq x der recizq recder
         recder = recAB z f der
 
 foldAB :: b -> (b -> a -> b -> b) -> AB a -> b
-foldAB z f = recAB z fRec
-  where fRec = \_ n _ rIzq rDer -> f rIzq n rDer
+foldAB z f = recAB z (\_ n _ ri rd -> f ri n rd)
 
 mapAB :: (a -> b) -> AB a -> AB b
 mapAB = undefined
@@ -66,12 +65,14 @@ mapAB = undefined
 nilOCumple :: (a -> a -> Bool) -> a -> AB a -> Bool
 nilOCumple c x ab = foldAB True (\_ n _ -> x `c` n) ab
 
+-- Verificamos que los subarboles son un ABB y que el arbol agregando el
+-- elemento e también es un ABB
 esABB :: Ord a => AB a -> Bool
 esABB = recAB True fRec
-  where fRec            = \izq n der rIzq rDer -> (g izq n der) && rIzq && rDer
-        g               = \izq n der -> (esMayorQueTodos n izq) && (esMenorQueTodos n der)
-        esMayorQueTodos = \x ab -> x >= (foldAB x (\rI n rD -> maximum [rI,n,rD]) ab)
-        esMenorQueTodos = \x ab -> x <= (foldAB x (\rI n rD -> minimum [rI,n,rD]) ab)
+  where fRec            = \izq n der rIzq rDer -> (esUnABBAPartirDe izq n der) && rIzq && rDer
+        esUnABBAPartirDe = (\i e d -> (esMayorQueTodos e i) && (esMenorQueTodos e d))
+        esMayorQueTodos = \x ab -> x >= (foldAB x (\rI n rD -> maximum [rI, n, rD]) ab)
+        esMenorQueTodos = \x ab -> x <= (foldAB x (\rI n rD -> minimum [rI, n, rD]) ab)
 
 esHeap :: (a -> a -> Bool)  -> AB a -> Bool
 esHeap c = recAB True f
@@ -87,44 +88,52 @@ insertarABB ab x = recAB (abHoja x) (\izq n der rIzq rDer -> if x > n
                                                              then (Bin izq n rDer)
                                                              else (Bin rIzq n der)) ab
 
-swapHeap :: (a -> a -> Bool) -> AB a -> a -> (a, AB a)
-swapHeap c (Bin i e d) x = if e `c` x then (e, Bin i x d) else (x, Bin i e d)
+swapChildren :: (a -> a -> Bool) -> AB a -> a -> (a, AB a)
+swapChildren c (Bin i e d) x = if e `c` x
+                           then (e, Bin i x d)
+                           else (x, Bin i e d)
 
 swapDer = (\i e d c ->
-    let (x, der) = swapHeap c d e
-    in Bin i x der)
+            let (x, der) = swapChildren c d e
+            in Bin i x der)
 
 swapIzq = (\i e d c ->
-    let (x, izq) = swapHeap c i e
-    in Bin izq x d)
+            let (x, izq) = swapChildren c i e
+            in Bin izq x d)
 
 insertarHeap :: (a -> a -> Bool) -> AB a -> a -> AB a
 insertarHeap c ab x = recAB (abHoja x)
-                            (\izq n der rIzq rDer -> if ((completo izq) &&
-                                                        (cantNodos izq) > (cantNodos der))
-                                                     then (swapDer izq n rDer c)
-                                                     else (swapIzq rIzq n der c)) ab
+                            (\izq n der rIzq rDer ->
+                                if ((completo izq) && (cantNodos izq) > (cantNodos der))
+                                then (swapDer izq n rDer c)
+                                else (swapIzq rIzq n der c)) ab
 
 truncar :: AB a -> Integer -> AB a
 truncar = undefined
 
 -- Funciones auxiliares
 cantNodos :: AB a -> Integer
-cantNodos = foldAB 0 (\rIzq n rDer -> 1 + rIzq + rDer)
+cantNodos = foldAB 0 (\i _ d -> 1 + i + d)
+
+insertHeapAux :: AB Integer -> Integer -> AB Integer
+insertHeapAux = (\h v -> insertarHeap (<) h v)
+
+root :: AB a -> a
+root (Bin i e d) = e
 
 --Ejecución de los tests
---main :: IO Counts
---main = do runTestTT allTests
---
---allTests = test [
+main :: IO Counts
+main = do runTestTT allTests
+
+allTests = test [
 --  "ejercicio1" ~: testsEj1,
 --  "ejercicio2" ~: testsEj2,
 --  "ejercicio3" ~: testsEj3,
 --  "ejercicio4" ~: testsEj4,
 --  "ejercicio5" ~: testsEj5,
---  "ejercicio6" ~: testsEj6,
+  "ejercicio6" ~: testsEj6
 --  "ejercicio7" ~: testsEj7
---  ]
+  ]
 --
 --testsEj1 = test [
 --  [1,2,4,5,7] ~=? inorder ab7,
@@ -140,21 +149,24 @@ cantNodos = foldAB 0 (\rIzq n rDer -> 1 + rIzq + rDer)
 --  0 ~=? 0 --Cambiar esto por tests verdaderos.
 --  ]
 --
---testsEj4 = test [
---  0 ~=? 0 --Cambiar esto por tests verdaderos.
---  ]
+testsEj4 = test [
+    True ~=? esABB ab5,
+    True ~=? esABB ab9,
+    True ~=? esABB ab10
+  ]
 --
 --testsEj5 = test [
 --  0 ~=? 0 --Cambiar esto por tests verdaderos.
 --  ]
 --
---testsEj6 = test [
+testsEj6 = test [
 --  True ~=? esHeap (<) (insertarHeap (<) (insertarHeap (<) ab6 3) 1),
 --  True ~=? esABB (insertarABB (insertarABB ab7 6) 9)
---  ]
+    True ~=? esHeap (<) (insertHeapAux (insertHeapAux (insertHeapAux ab1 3) 6) 7),
+    True ~=? 1 == (root (insertHeapAux ab1 1))
+  ]
 --
 --testsEj7 = test [
 --  [8,4,12,2,10,6,14,1,9,5,13,3,11,7,15] ~=? inorder (truncar ab8 4),
 --  True ~=? esHeap (<) (truncar ab8 5)
 --  ]
-
