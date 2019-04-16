@@ -83,7 +83,6 @@ esHeap c = recAB True f
 
 completo :: AB a -> Bool
 completo ab = (2^(altura ab) - 1) == (cantNodos ab)
-  where altura = foldAB 0 (\rIzq n rDer -> 1 + (max rIzq rDer))
 
 insertarABB :: Ord a => AB a -> a -> AB a
 insertarABB ab x = recAB (abHoja x) (\izq n der rIzq rDer -> if x > n
@@ -111,11 +110,15 @@ insertarHeap c ab x = recAB (abHoja x)
                                 else (swapIzq rIzq n der c)) ab
 
 truncar :: AB a -> Integer -> AB a
-truncar = undefined
+truncar =  foldAB (const Nil) f
+  where f = (\rIzq e rDer -> (\x -> if (x <= 0) then Nil else Bin (rIzq (x-1)) e (rDer (x-1)) ))
 
 -- Funciones auxiliares
 cantNodos :: AB a -> Integer
 cantNodos = foldAB 0 (\i _ d -> 1 + i + d)
+
+altura :: AB a -> Integer
+altura = foldAB 0 (\rIzq n rDer -> 1 + (max rIzq rDer))
 
 insertHeapAux :: AB Integer -> Integer -> AB Integer
 insertHeapAux = (\h v -> insertarHeap (<) h v)
