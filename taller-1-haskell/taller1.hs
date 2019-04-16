@@ -46,8 +46,10 @@ ab8 = Bin (mapAB (*2) ab8) 1 (mapAB ((+1) . (*2)) ab8)
 ab9 = Bin (Bin (abHoja 1) 2 (abHoja 4)) 3 (abHoja 5)
 -- Caso borde de ABB 2
 ab10 = Bin (abHoja 2) 3 (Bin (abHoja 1) 5 (abHoja 10))
-
-
+-- Caso completos
+ab11 = Bin (abHoja 3) 5 (abHoja 6)
+ab12 = Bin (Bin (abHoja 3) 5 (abHoja 6)) 7 (abHoja 9)
+ab13 = Bin (abHoja 4) 6 (abHoja 7)
 -- Ejercicios
 
 recAB :: b -> (AB a -> a -> AB a -> b -> b -> b) -> AB a -> b
@@ -60,7 +62,7 @@ foldAB :: b -> (b -> a -> b -> b) -> AB a -> b
 foldAB z f = recAB z (\_ n _ ri rd -> f ri n rd)
 
 mapAB :: (a -> b) -> AB a -> AB b
-mapAB = undefined
+mapAB f = foldAB Nil (\i e r -> Bin i (f e) r)
 
 nilOCumple :: (a -> a -> Bool) -> a -> AB a -> Bool
 nilOCumple c x ab = foldAB True (\_ n _ -> x `c` n) ab
@@ -126,24 +128,25 @@ main :: IO Counts
 main = do runTestTT allTests
 
 allTests = test [
---  "ejercicio1" ~: testsEj1,
---  "ejercicio2" ~: testsEj2,
+  "ejercicio1" ~: testsEj1,
+  "ejercicio2" ~: testsEj2,
 --  "ejercicio3" ~: testsEj3,
---  "ejercicio4" ~: testsEj4,
---  "ejercicio5" ~: testsEj5,
+  "ejercicio4" ~: testsEj4,
+  "ejercicio5" ~: testsEj5,
   "ejercicio6" ~: testsEj6
 --  "ejercicio7" ~: testsEj7
   ]
 --
---testsEj1 = test [
---  [1,2,4,5,7] ~=? inorder ab7,
---  [1,2,3,4,5,6,7] ~=? inorder ab5
---  ]
+testsEj1 = test [
+  [1,2,4,5,7] ~=? inorder ab7,
+  [1,2,3,4,5,6,7] ~=? inorder ab5
+  ]
 --
 --
---testsEj2 = test [
---  [5,3,6,1,7] ~=? inorder (mapAB (+1) ab6)
---  ]
+testsEj2 = test [
+    [5,3,6,1,7] ~=? inorder (mapAB (+1) ab6),
+    True ~=? (mapAB (\x -> x + 1) ab11) == ab13
+  ]
 --
 --testsEj3 = test [
 --  0 ~=? 0 --Cambiar esto por tests verdaderos.
@@ -151,17 +154,19 @@ allTests = test [
 --
 testsEj4 = test [
     True ~=? esABB ab5,
-    True ~=? esABB ab9,
-    True ~=? esABB ab10
+    False ~=? esABB ab9,
+    False ~=? esABB ab10
   ]
 --
---testsEj5 = test [
---  0 ~=? 0 --Cambiar esto por tests verdaderos.
---  ]
+testsEj5 = test [
+    True ~=? completo (abHoja 3),
+    True ~=? completo ab11,
+    False ~=? completo ab12
+  ]
 --
 testsEj6 = test [
---  True ~=? esHeap (<) (insertarHeap (<) (insertarHeap (<) ab6 3) 1),
---  True ~=? esABB (insertarABB (insertarABB ab7 6) 9)
+    True ~=? esHeap (<) (insertarHeap (<) (insertarHeap (<) ab6 3) 1),
+    True ~=? esABB (insertarABB (insertarABB ab7 6) 9),
     True ~=? esHeap (<) (insertHeapAux (insertHeapAux (insertHeapAux ab1 3) 6) 7),
     True ~=? 1 == (root (insertHeapAux ab1 1))
   ]
