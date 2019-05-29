@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Taller de JavaScript</title>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="taller.js"></script>
+<script type="text/javascript">
+function mostrar(){
+	document.getElementById("resultado").innerHTML = calcularResultado();
+}
+</script>
+</head>
+<body>
+<div>
+<p>Edit&aacute; el archivo taller.js y luego recarg&aacute; esta p&aacute;gina y hac&eacute; clic en el bot&oacute;n para ver el resultado de la ejecuci&oacute;n.</p>
+<input type="button" name="mostrar" id="mostrar" onclick="mostrar()" value="Mostrar el resultado"><br><br>
+</div>
+<div id="resultado" />
+</body>
+</html>
