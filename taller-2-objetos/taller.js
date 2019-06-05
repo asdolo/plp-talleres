@@ -152,6 +152,8 @@ q1.nuevaTransicionND("a", q2);
 console.log(esDeterministico(q1) === false);
 console.log(esDeterministico(q3));
 
+console.log("Fin tests.");
+
 function calcularResultado(){
     //Editen esta función para que devuelva lo que quieran ver. Pueden escribir acá sus tests.
     return "Ac&aacute; va el resultado.";
