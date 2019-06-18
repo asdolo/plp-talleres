@@ -60,8 +60,8 @@ borraRespuestas :- retractall(si(X)), retractall(no(X)).
 
 % Ejercicio 6
 
-adivinarPersonaje :- atributos(X, L), satisfaceAtributos(L), mostrarPersonaje(X), borraRespuestas, !.
-adivinarPersonaje :- borraRespuestas, fail.
+%adivinarPersonaje :- atributos(X, L), satisfaceAtributos(L), mostrarPersonaje(X), borraRespuestas, !.
+%adivinarPersonaje :- borraRespuestas, fail.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -74,25 +74,31 @@ adivinarPersonaje :- borraRespuestas, fail.
 
 % Ejercicio 8
 
-mismosElementos([], []).
-mismosElementos([H], L2) :- member(H, L2). 
-mismosElementos([H|T], L2) :- member(H, L2), mismosElementos(T, L2).
+esSubConjunto([], L2).
+esSubConjunto([H|T], L2) :- member(H, L2), esSubConjunto(T, L2).
 
-mismos(L1, L2) :- length(L1, L), length(L2, L), mismosElementos(L1, L2).
+mismos(L1, L2) :- length(L1, L), length(L2, L), esSubConjunto(L1, L2).
 
-existeOtroConMismosAtributos(ATTR) :- atributos(N, ATTR), mismos(ATTR, A).
+existeOtroConMismosAtributos(ATTR) :- atributos(N, A), mismos(ATTR, A).
 existeOtroConElMismoNombre(N) :- atributos(N, _).
 
 % agregarPersonaje(+Nombre, +Atributos).
 agregarPersonaje(N1, A1) :- not(existeOtroConMismosAtributos(A1)), 
 							not(existeOtroConElMismoNombre(N1)), assertz(atributos(N1, A1)).
 
+%asserta le da más prioridad al último personaje agregado, ya que lo agrega al principio de la base de conocimientos del atributo
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+ingresarPersonaje :- write("Ingrese un personaje y una lista de atributos"), nl, 
+					 read(P), read(L), setof(X, si(X), L2), append(L, L2, L3), agregarPersonaje(P, L3).
+
 % Ejercicio 9
+adivinarPersonaje :- atributos(X, L), satisfaceAtributos(L), mostrarPersonaje(X), borraRespuestas, !.
+adivinarPersonaje :- ingresarPersonaje, borraRespuestas.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TESTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 test(1) :- true.
-tests :- forall(between(1,1,N), test(N)). % Hacer mejores tests y cambiar 1 por la cantidad de tests que tengan.
+tests :- forall(between(1,9,N), test(N)). % Hacer mejores tests y cambiar 1 por la cantidad de tests que tengan.
 
