@@ -48,8 +48,6 @@ function Estado(esFinal, transiciones) {
         if (s === "") {
             return this.esFinal;
         } else if (this.transiciones[s.head()]) {
-            let aux = s.head();
-            let aux2 = s.tail();
             return this.transiciones[s.head()].acepta(s.tail());
         }
         return false;
@@ -122,35 +120,63 @@ Estado.prototype.nuevaTransicionND = function (etiqueta, destino) {
 // Ejercicio 7
 
 
-function esDeterministicoAux(q, visitados) {
+function esDeterministicoConVisitados(q, visitados) {
     return Object.keys(q.transiciones)
     .every((elem) => {
             if (Array.isArray(q.transiciones[elem]))
                 return false
 
             // no es un arreglo
-            if (q.transiciones[elem] == q) {
+            if (!visitados.includes(q.transiciones[elem])) {
+                visitados.push(q.transiciones[elem]);
+                return esDeterministicoConVisitados(q.transiciones[elem], visitados);
+            } else {
                 return true;
             }
-
-            // apunta a otro
-            if (!visitados.includes(elem))
-                return true;
-            else
-                visitados.push(elem);
-
-            return esDeterministicoAux(q.transiciones[elem], visitados);
     });
 }
 
 function esDeterministico(q) {
-    return esDeterministicoAux(q, []);
+    return esDeterministicoConVisitados(q, []);
+}
+
+let q40 = {
+    esFinal: true,
+    transiciones: {}
+}
+
+let q30 = {
+    esFinal: true,
+    transiciones: {}
+}
+
+let q20 = {
+    esFinal: true,
+    transiciones: {a: [q30, q40]}
+}
+
+let q10 = {
+    esFinal: false,
+    transiciones: {a: q20},
 }
 
 
-q1.nuevaTransicionND("a", q2);
-console.log(esDeterministico(q1) === false);
-console.log(esDeterministico(q3));
+console.log(esDeterministico(q10) === false);
+
+q20 = {
+    esFinal: true,
+    transiciones: {}
+}
+
+q10 = {
+    esFinal: false,
+    transiciones: {a: q20},
+}
+
+q20.transiciones.a = q10;
+
+
+console.log(esDeterministico(q10) === true);
 
 console.log("Fin tests.");
 
@@ -158,3 +184,4 @@ function calcularResultado(){
     //Editen esta función para que devuelva lo que quieran ver. Pueden escribir acá sus tests.
     return "Ac&aacute; va el resultado.";
 }
+
